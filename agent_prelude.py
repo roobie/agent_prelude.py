@@ -11,7 +11,7 @@ import requests
 # Filesystem operations
 def read(path, format="auto"):
     """Read file, auto-detecting JSON/text."""
-    content = Path(path).expanduser().read_text()
+    content = Path(path).expanduser().read_text(encoding='utf-8')
     if format == "json" or (format == "auto" and path.endswith(".json")):
         return json.loads(content)
     return content
@@ -21,11 +21,11 @@ def write(path, data, format="auto"):
     """Write file, auto-serializing dicts to JSON."""
     path = Path(path).expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
-    if isinstance(data, (dict, list)):
+    if format == 'json' or (format == 'auto' and isinstance(data, (dict, list))):
         content = json.dumps(data, indent=2)
     else:
         content = str(data)
-    path.write_text(content)
+    path.write_text(content, encoding='utf-8')
 
 
 def append(path, data):
@@ -65,26 +65,30 @@ def grep(pattern, path, recursive=True):
             for i, line in enumerate(content.split("\n"), 1):
                 if re.search(pattern, line):
                     results.append({"file": p, "line": i, "text": line.strip()})
-        except:
-            pass
+        except (UnicodeDecodeError, PermissionError, IsADirectoryError) as e:
+            log(f"grep skipped {p}: {e}", level="WARN")
     return results
 
 
 # HTTP operations
-def get(url, timeout=30, **kwargs):
+def get(url, timeout=30, raw=False, **kwargs):
     """HTTP GET, returns JSON if possible, else text."""
     r = requests.get(url, timeout=timeout, **kwargs)
     r.raise_for_status()
+    if raw:
+        return r
     try:
         return r.json()
     except:
         return r.text
 
 
-def post(url, data=None, timeout=30, **kwargs):
+def post(url, data=None, timeout=30, raw=False, **kwargs):
     """HTTP POST with JSON data."""
     r = requests.post(url, json=data, timeout=timeout, **kwargs)
     r.raise_for_status()
+    if raw:
+        return r
     try:
         return r.json()
     except:
@@ -110,9 +114,24 @@ def sh(command, check=False):
     return result.stdout.strip()
 
 
+def run(args, check=False):
+    """Run command with args list, return stdout."""
+    result = subprocess.run(
+        args,
+        shell=False,
+        capture_output=True,
+        text=True
+    )
+    if check and result.returncode != 0:
+        raise subprocess.CalledProcessError(
+            result.returncode, args, result.stdout, result.stderr
+        )
+    return result.stdout.strip()
+
+
 # Utilities
 def log(msg, level="INFO"):
-    """Simple logging to stderr."""
+    """Simple logging to stderr. Levels: DEBUG, INFO, WARN, ERROR."""
     timestamp = datetime.now().isoformat()
     print(f"[{timestamp}] {level}: {msg}", file=sys.stderr)
 

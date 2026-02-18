@@ -70,6 +70,102 @@ log(f"Disk usage: {disk_usage}")
 sh('git clone https://github.com/user/repo.git')
 ```
 
+**Safer shell execution with `run()`:**
+```python
+# Use run() for commands with user input to avoid shell injection
+# Instead of sh(f'grep "{pattern}" file.txt')
+result = run(['grep', pattern, 'file.txt'])
+log(f"Grep result: {result}")
+
+# Check exit code
+try:
+    output = run(['git', 'status'], check=True)
+    log("Git status successful")
+except subprocess.CalledProcessError as e:
+    log(f"Git command failed: {e}", level="ERROR")
+```
+
+**Advanced HTTP with raw response:**
+```python
+# Access full response object for headers/status
+response = get('https://api.example.com/data', raw=True)
+log(f"Status: {response.status_code}, Rate limit: {response.headers.get('X-RateLimit-Remaining')}")
+
+# Conditional logic based on response
+if response.status_code == 200:
+    data = response.json()
+    # Process data
+```
+
+**File operations with format control:**
+```python
+# Force JSON output even for strings
+write('output/data.json', "some string data", format='json')
+
+# Force text output for dicts
+write('output/debug.txt', {'key': 'value'}, format='text')
+
+# Append to log file
+append('app.log', f"{now()}: Process started")
+```
+
+**Comprehensive scraping example (like HN points sum):**
+```python
+# Fetch HTML page
+html = get('https://news.ycombinator.com/')
+
+# Extract data with regex
+import re
+scores = re.findall(r'<span class="score"[^>]*>(\d+) points</span>', html)
+total_points = sum(int(s) for s in scores)
+
+# Log results
+log(f"Total HN points: {total_points}", level="INFO")
+
+# Save structured data
+stories = []
+for match in re.finditer(r'<a href="([^"]*)"[^>]*>([^<]*)</a>.*?<span class="score"[^>]*>(\d+) points</span>', html, re.DOTALL):
+    stories.append({
+        'url': match.group(1),
+        'title': match.group(2),
+        'points': int(match.group(3))
+    })
+
+write('hn_stories.json', stories)
+log(f"Saved {len(stories)} stories")
+```
+
+**Error handling and logging:**
+```python
+try:
+    data = get('https://api.example.com/data')
+    log("Data fetched successfully")
+except requests.HTTPError as e:
+    log(f"HTTP error: {e}", level="ERROR")
+except Exception as e:
+    log(f"Unexpected error: {e}", level="ERROR")
+
+# Use different log levels
+log("Starting process", level="DEBUG")
+log("Process completed", level="INFO")
+log("Warning: low disk space", level="WARN")
+```
+
+**Working with paths and existence:**
+```python
+config_path = '~/myapp/config.json'
+if not exists(config_path):
+    write(config_path, {'default': True})
+
+# List subdirectories
+dirs = [d for d in ls('.') if os.path.isdir(d)]
+log(f"Directories: {dirs}")
+
+# Find specific files recursively
+test_files = find('test_*.py', 'src/')
+log(f"Found {len(test_files)} test files")
+```
+
 ---
 
 ### Key Design Principles
