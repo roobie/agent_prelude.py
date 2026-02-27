@@ -37,7 +37,11 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           version: '2024.10.0'
-          install: true
+          # Do not let the action auto-install tools from mise.toml (e.g. python),
+          # because setup-uv already provided Python. This prevents mise from
+          # attempting to fetch the `python-precompiled` artifact which may not
+          # exist on the server for the runner platform.
+          install: false
           cache: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
