@@ -1,0 +1,33 @@
+[project]
+name = "agent-prelude-py"
+version = "0.0.0"
+readme = "README.md"
+description = "A small prelude that provides convenient helpers for LLM-driven Python scripting"
+requires-python = ">=3.12"
+dependencies = [
+  "requests"
+]
+
+[project.scripts]
+agh = "agent_prelude.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_prelude"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+exclude = ["__pycache__", "build", "dist", ".venv", "venv", "tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "ruff>=0.15.4",
+    "ty>=0.0.19",
+]

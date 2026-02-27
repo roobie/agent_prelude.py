@@ -1,9 +1,14 @@
-#!/usr/bin/env python3
-# agent_prelude.py
+"""agent_prelude package
 
-import sys, os, re, json
+This module provides the same helper functions as the top-level agent_prelude.py
+but packaged so the project is installable.
+"""
+
+import sys
+import re
+import json
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 import subprocess
 import requests
 
@@ -11,7 +16,7 @@ import requests
 # Filesystem operations
 def read(path, format="auto"):
     """Read file, auto-detecting JSON/text."""
-    content = Path(path).expanduser().read_text(encoding='utf-8')
+    content = Path(path).expanduser().read_text(encoding="utf-8")
     if format == "json" or (format == "auto" and path.endswith(".json")):
         return json.loads(content)
     return content
@@ -21,11 +26,11 @@ def write(path, data, format="auto"):
     """Write file, auto-serializing dicts to JSON."""
     path = Path(path).expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
-    if format == 'json' or (format == 'auto' and isinstance(data, (dict, list))):
+    if format == "json" or (format == "auto" and isinstance(data, (dict, list))):
         content = json.dumps(data, indent=2)
     else:
         content = str(data)
-    path.write_text(content, encoding='utf-8')
+    path.write_text(content, encoding="utf-8")
 
 
 def append(path, data):
@@ -79,7 +84,7 @@ def get(url, timeout=30, raw=False, **kwargs):
         return r
     try:
         return r.json()
-    except:
+    except Exception:
         return r.text
 
 
@@ -91,7 +96,7 @@ def post(url, data=None, timeout=30, raw=False, **kwargs):
         return r
     try:
         return r.json()
-    except:
+    except Exception:
         return r.text
 
 
@@ -120,7 +125,7 @@ def run(args, check=False):
         args,
         shell=False,
         capture_output=True,
-        text=True
+        text=True,
     )
     if check and result.returncode != 0:
         raise subprocess.CalledProcessError(

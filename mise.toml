@@ -1,0 +1,24 @@
+[tools]
+# Specify Python version for mise-managed environments (optional)
+python = "3.12"
+
+[tasks.format]
+run = "uv run ruff format ."
+
+[tasks.lint]
+run = "uv run ruff check ."
+
+[tasks.typecheck]
+run = "uv run ty check -- ."
+
+[tasks.test]
+run = "uv run pytest"
+
+[tasks.quality]
+# Run the full quality pipeline: format -> lint -> typecheck -> tests
+# Using && so the pipeline stops on the first failing step
+run = "uv run ruff format . && uv run ruff check . && uv run ty check -- . && uv run pytest"
+
+[tasks.setup-dev]
+# Convenience task to ensure dev dependencies are installed via uv
+run = "uv add --dev pytest ruff ty"
