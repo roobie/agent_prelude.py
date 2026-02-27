@@ -1,0 +1,60 @@
+name: CI (uv manager, mise runner)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv and provision Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: '3.12'
+          enable-cache: 'true'
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+            **/requirements*.txt
+
+      - name: Show uv info
+        run: |
+          uv --version
+          uv python --version || true
+
+      - name: Sync virtual environment (install deps via uv)
+        run: |
+          uv sync --yes
+
+      - name: Install mise (task runner)
+        uses: jdx/mise-action@v3
+        with:
+          version: '2024.10.0'
+          install: true
+          cache: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trust local mise config
+        run: |
+          # mark repository mise.toml as trusted so mise can parse templates or envs non-interactively
+          mise trust --yes || true
+
+      - name: Run quality pipeline (via mise)
+        run: |
+          mise run quality
+
+      - name: Build wheel and sdist (via uv)
+        run: |
+          uv run --frozen python -m build -w
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
