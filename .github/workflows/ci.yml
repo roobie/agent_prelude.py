@@ -30,7 +30,8 @@ jobs:
 
       - name: Sync virtual environment (install deps via uv)
         run: |
-          uv sync --yes
+          # Use --frozen to avoid modifying the lockfile during CI
+          uv sync --frozen
 
       - name: Install mise (task runner)
         uses: jdx/mise-action@v3
@@ -49,9 +50,10 @@ jobs:
         run: |
           mise run quality
 
-      - name: Build wheel and sdist (via uv)
+      - name: Build distribution (via uv)
         run: |
-          uv run --frozen python -m build -w
+          # Use uv to build the project artifacts
+          uv build
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4

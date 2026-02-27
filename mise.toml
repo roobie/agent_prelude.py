@@ -19,6 +19,9 @@ run = "uv run pytest"
 # Using && so the pipeline stops on the first failing step
 run = "uv run ruff format . && uv run ruff check . && uv run ty check -- . && uv run pytest"
 
+[tasks.build]
+run = "uv build"
+
 [tasks.setup-dev]
 # Convenience task to ensure dev dependencies are installed via uv
 run = "uv add --dev pytest ruff ty"
