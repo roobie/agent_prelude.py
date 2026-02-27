@@ -8,12 +8,11 @@ Usage:
 If --files is omitted, the script will try to infer changed files via `git status --porcelain`.
 The chronicle file used is chronicles/YYYY-MM-DD-session.md (created if missing).
 """
+
 import argparse
 from datetime import datetime
 from pathlib import Path
 import subprocess
-import shlex
-import sys
 
 
 def git_changed_files():
