@@ -33,17 +33,12 @@ jobs:
           # Use --frozen to avoid modifying the lockfile during CI
           uv sync --frozen
 
-      - name: Install mise (task runner)
-        uses: jdx/mise-action@v3
-        with:
-          version: '2024.10.0'
-          # Do not let the action auto-install tools from mise.toml (e.g. python),
-          # because setup-uv already provided Python. This prevents mise from
-          # attempting to fetch the `python-precompiled` artifact which may not
-          # exist on the server for the runner platform.
-          install: false
-          cache: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install mise (script)
+        run: |
+          # Install mise using the official installer script and add to PATH
+          curl -sSf https://mise.run | sh
+          echo "$HOME/.local/share/mise/bin" >> $GITHUB_PATH
+          echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
 
       - name: Trust local mise config
         run: |
