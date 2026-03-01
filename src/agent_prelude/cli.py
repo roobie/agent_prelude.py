@@ -39,8 +39,11 @@ def main():
 
     if args.primer:
         # Load the primer text from the top-level README for brevity
+        from pathlib import Path
+        root = Path(os.path.abspath(__file__)).parent
         try:
-            with open("README.md", "r", encoding="utf-8") as f:
+            primer = root / "PRIMER.md"
+            with open(primer, "r", encoding="utf-8") as f:
                 primer_text = f.read()
         except Exception:
             primer_text = "agent_prelude — no primer available"

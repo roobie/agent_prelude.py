@@ -10,7 +10,7 @@ The chronicle file used is chronicles/YYYY-MM-DD-session.md (created if missing)
 """
 
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 
@@ -32,12 +32,13 @@ def git_changed_files():
 
 
 def append_entry(title, summary, participants, commands, files):
-    today = datetime.utcnow().date().isoformat()
+    today = datetime.now(timezone.utc).date().isoformat()
     chronicle_dir = Path("chronicles")
     chronicle_dir.mkdir(parents=True, exist_ok=True)
     path = chronicle_dir / f"{today}-session.md"
 
-    timestamp = datetime.utcnow().isoformat() + "Z"
+    # Use a timezone-aware UTC timestamp and format with a trailing Z
+    timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
     lines = []
     lines.append(f"## {timestamp} — {title}\n")

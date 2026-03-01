@@ -1,6 +1,6 @@
 [project]
 name = "agent-prelude-py"
-version = "0.0.1"
+version = "0.0.3"
 readme = "README.md"
 description = "A small prelude that provides convenient helpers for LLM-driven Python scripting"
 requires-python = ">=3.12"
